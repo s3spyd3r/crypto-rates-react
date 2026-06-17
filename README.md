@@ -1,57 +1,123 @@
-# Simple Cryptocurrency Calculator
+# Crypto Rates React
 
-A small PHP-based calculator that shows the fiat value of a selected cryptocurrency using live prices. 
-The project supports multiple cryptocurrencies (BTC, ETH, LTC, etc.) and is responsive for mobile and tablet devices.
+Pick a cryptocurrency, enter an amount, and see its live value in 162 fiat
+currencies. Rates are pulled from CEX.io and Fixer.io, cached server-side, and
+combined into a single headline figure plus a reference grid. Every selection
+— coin, amount, currency — is mirrored to the URL, so any view is shareable
+as a link. A single-page app with no backend of our own; the server is just a
+thin proxy for the two external APIs.
 
 ## Features
 
-- Multi-cryptocurrency support via CEX.io ticker API
-- Fiat conversion using Fixer.io exchange rates (EUR base)
-- Responsive layout built with Bootstrap
-- Simple file-based caching of API responses (`includes/class/currency_<COIN>.json`)
-- Mobile-friendly inputs with spacing and touch-friendly controls
+- **6 cryptocurrencies**: Bitcoin, Ethereum, Litecoin, Stellar, XRP, and
+  Bitcoin Cash — switchable from a single dropdown.
+- **162 fiat currencies**: every entry from the ISO-4217 list (plus the
+  legacy `XCG` slot from the original), with full names and live EUR-base
+  rates.
+- **Live rates with smart caching**: CEX.io prices refresh every 60 s;
+  Fixer.io exchange rates every 24 h. Cache is per-coin, so switching
+  coins is instant.
+- **Shareable URLs**: `?coin=BTC&amt=1.5&code=USD` — every state change
+  rewrites the URL via `router.replace` inside `startTransition`, so
+  history isn't polluted and the page never jumps.
+- **Light and dark theme**: a `.dark` class on `<html>`, persisted in
+  `localStorage`, with a no-flash inline script in `<head>`. System
+  preference is the default.
+- **Copy result**: one click copies the headline figure (`1.5 BTC = 67,000.00
+  USD`) to the clipboard.
+- **Locale-aware formatting**: prices use `Intl.NumberFormat` with tabular
+  numerals (JetBrains Mono) so columns align. Currency codes are rendered
+  with a code prefix (`USD 1,000.00`) for consistency across all 162
+  currencies, including the non-ISO `XCG` entry.
+- **Reference grid**: below the headline, every fiat is listed with its
+  value for 1 coin. The currently selected currency is highlighted.
+- **Clear error states**: missing or invalid `FIXER_API_KEY` shows a
+  specific message — the real Fixer error, not a generic "not set" — and
+  the CEX.io failure mode surfaces the HTTP status, network error, or
+  unexpected payload, whichever applies.
+- **Mobile-friendly**: the hero, input row, and 3-column grid reflow
+  cleanly down to phone-width.
 
-## Prerequisites
+## Stack
 
-- PHP 7.2+ (recommended) with the following extensions enabled:
-	- curl
-	- json
-- Webserver (one of):
-	- XAMPP (recommended for Windows)
-	- Built-in PHP server for development
-- Internet access (to call external APIs: CEX.io and Fixer.io)
+- **Next.js 15** (App Router) + **React 19** + **TypeScript**
+- **Tailwind CSS 4** for styling
+- `next/font` for Inter (UI) and JetBrains Mono (numbers)
+- No client-side state library. A single `useState` / `startTransition`
+  tree in the calculator component.
+
+## Run
+
+```bash
+npm install
+npm run dev          # http://localhost:3000
+```
+
+For production:
+
+```bash
+npm run build
+npm start
+```
+
+Node 18.18+ is required (Next 15 requirement).
 
 ## Configuration
 
-Open `includes/site.config.php`
+The Fixer.io key is the only required configuration. Create `.env.local`:
 
-Note: If your environment uses a different path or URL, update `base_url` accordingly.
+```
+FIXER_API_KEY=your_key_here
+```
 
-## Important implementation notes
+Without it the app falls back to showing only EUR — every other fiat will be
+empty in the dropdowns and grid. The key is read server-side only and never
+sent to the client.
 
-- API integrations:
-	- Crypto prices come from CEX.io via `https://cex.io/api/ticker/<CRYPTO>/EUR`.
-	- Fiat rates come from Fixer.io via `http://data.fixer.io/latest?base=EUR&access_key=<KEY>`.
+Get a key at [fixer.io](https://fixer.io).
 
-- Caching:
-	- The app writes per-crypto JSON cache files to `includes/class/currency_<COIN>.json`.
-	- To force a refresh, delete the relevant cache file or implement a purge in the UI.
+## How it works
 
-- Styling and layout:
-	- Coin logos are in `assets/img/` and referenced in `includes/crypto.map.php`.
+- **CEX.io** (`https://cex.io/api/ticker/<COIN>/EUR`) — last traded price of
+  the selected coin in EUR. Cached server-side for 60 seconds.
+- **Fixer.io** (`http://data.fixer.io/latest?base=EUR&access_key=...`) — EUR
+  base rates against 162 fiat currencies. Cached server-side for 24 hours.
+- The two responses are combined in a tiny server function (`lib/cexio.ts` →
+  `getCoinRates`) and the product is rendered as the headline figure plus a
+  reference grid.
 
-## Files of interest
+Both APIs are reached from `app/api/rates/[coin]/route.ts` (used when the
+user switches coins client-side) and from the page itself when the page is
+server-rendered. The page reads `?coin`, `?amt`, and `?code` from the URL so
+every view is shareable.
 
-- `index.php` — main page
-- `calculator.php` — performs form handling / calculation
-- `includes/class/bitcoincalc.class.php` — API access, combining prices, caching
-- `includes/crypto.map.php` — mapping of coins to colors and logo files
-- `includes/wrapper/header.template.php` & `includes/wrapper/footer.template.php` — header/footer templates
-- `assets/css/site.css` — main custom CSS
-- `assets/img/` — coin logos and images
+## Project layout
 
+```
+app/
+  layout.tsx               root layout, fonts, theme bootstrap
+  page.tsx                 main page (server component, fetches initial rates)
+  globals.css              Tailwind + design tokens
+  api/rates/[coin]/        server proxy for CEX + Fixer
+components/
+  Calculator.tsx           client component, owns state
+  CurrencyGrid.tsx         reference grid of all 162 currencies
+  ThemeToggle.tsx          light / dark toggle
+lib/
+  coins.ts                 coin metadata (id, name, color, logo)
+  fiat.ts                  ISO-4217 currency name map (162 entries)
+  cexio.ts                 CEX + Fixer clients + combine
+  format.ts                Intl.NumberFormat helpers
+  types.ts                 shared types
+  site.ts                  site-wide constants
+public/img/                coin SVGs
+```
 
-## Screenshots
-<img src="https://raw.githubusercontent.com/s3spyd3r/Bitcoin_calculator/master/images/screencapture-desktop.png" height=400px>
+## Adding a coin
 
-<img src="https://raw.githubusercontent.com/s3spyd3r/Bitcoin_calculator/master/images/screencapture-mobile.png" height=400px>
+Edit `lib/coins.ts` — add a `{ id, name, color, logo }` entry and drop a SVG
+in `public/img/`. The dropdown and grid will pick it up automatically.
+
+## Adding a fiat
+
+Edit `lib/fiat.ts` — add `<CODE>: '<Display name>'` to the `FIAT_NAMES` map.

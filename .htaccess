@@ -1,4 +1,0 @@
-<IfModule mod_rewrite.c>
-   RewriteEngine on
-   RewriteRule ^currency/([A-Z]+)$ calculator.php?code=$1
-</IfModule>

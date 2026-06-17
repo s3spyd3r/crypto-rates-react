@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono);
+}
+
+:root {
+  --bg: #FAFAF9;
+  --surface: #FFFFFF;
+  --fg: #0A0A0A;
+  --fg-muted: #6B6B6B;
+  --border: #E7E5E4;
+  --muted: #F5F5F4;
+}
+
+.dark {
+  --bg: #0A0A0A;
+  --surface: #141414;
+  --fg: #FAFAF9;
+  --fg-muted: #A1A1AA;
+  --border: #27272A;
+  --muted: #18181B;
+}
+
+@layer base {
+  html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.is-loading {
+  animation: pulse-soft 1.4s ease-in-out infinite;
+}
