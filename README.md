@@ -1,23 +1,18 @@
 # Crypto Rates React
 
-Pick a cryptocurrency, enter an amount, and see its live value in 162 fiat
-currencies. Rates are pulled from CEX.io and Fixer.io, cached server-side, and
-combined into a single headline figure plus a reference grid. Every selection
-— coin, amount, currency — is mirrored to the URL, so any view is shareable
-as a link. A single-page app with no backend of our own; the server is just a
-thin proxy for the two external APIs.
+A simple cryptocurrency calculator built with Next.js, React, and Tailwind CSS. It converts between 6 cryptocurrencies and 162 fiat currencies using live exchange rates fetched from external APIs
 
 ## Features
 
 - **6 cryptocurrencies**: Bitcoin, Ethereum, Litecoin, Stellar, XRP, and
-  Bitcoin Cash — switchable from a single dropdown.
+  Bitcoin Cash, switchable from a single dropdown.
 - **162 fiat currencies**: every entry from the ISO-4217 list (plus the
   legacy `XCG` slot from the original), with full names and live EUR-base
   rates.
 - **Live rates with smart caching**: CEX.io prices refresh every 60 s;
   Fixer.io exchange rates every 24 h. Cache is per-coin, so switching
   coins is instant.
-- **Shareable URLs**: `?coin=BTC&amt=1.5&code=USD` — every state change
+- **Shareable URLs**: `?coin=BTC&amt=1.5&code=USD`. Every state change
   rewrites the URL via `router.replace` inside `startTransition`, so
   history isn't polluted and the page never jumps.
 - **Light and dark theme**: a `.dark` class on `<html>`, persisted in
@@ -32,15 +27,15 @@ thin proxy for the two external APIs.
 - **Reference grid**: below the headline, every fiat is listed with its
   value for 1 coin. The currently selected currency is highlighted.
 - **Clear error states**: missing or invalid `FIXER_API_KEY` shows a
-  specific message — the real Fixer error, not a generic "not set" — and
-  the CEX.io failure mode surfaces the HTTP status, network error, or
+  specific message (the real Fixer error, not a generic "not set"). The
+  CEX.io failure mode surfaces the HTTP status, network error, or
   unexpected payload, whichever applies.
 - **Mobile-friendly**: the hero, input row, and 3-column grid reflow
   cleanly down to phone-width.
 
 ## Stack
 
-- **Next.js 15** (App Router) + **React 19** + **TypeScript**
+- **Next.js 16** (App Router) + **React 19** + **TypeScript 6**
 - **Tailwind CSS 4** for styling
 - `next/font` for Inter (UI) and JetBrains Mono (numbers)
 - No client-side state library. A single `useState` / `startTransition`
@@ -60,7 +55,7 @@ npm run build
 npm start
 ```
 
-Node 18.18+ is required (Next 15 requirement).
+Node 20+ is required (Next 16 minimum).
 
 ## Configuration
 
@@ -70,7 +65,7 @@ The Fixer.io key is the only required configuration. Create `.env.local`:
 FIXER_API_KEY=your_key_here
 ```
 
-Without it the app falls back to showing only EUR — every other fiat will be
+Without it the app falls back to showing only EUR. Every other fiat will be
 empty in the dropdowns and grid. The key is read server-side only and never
 sent to the client.
 
@@ -78,11 +73,11 @@ Get a key at [fixer.io](https://fixer.io).
 
 ## How it works
 
-- **CEX.io** (`https://cex.io/api/ticker/<COIN>/EUR`) — last traded price of
+- **CEX.io** (`https://cex.io/api/ticker/<COIN>/EUR`): last traded price of
   the selected coin in EUR. Cached server-side for 60 seconds.
-- **Fixer.io** (`http://data.fixer.io/latest?base=EUR&access_key=...`) — EUR
+- **Fixer.io** (`http://data.fixer.io/latest?base=EUR&access_key=...`): EUR
   base rates against 162 fiat currencies. Cached server-side for 24 hours.
-- The two responses are combined in a tiny server function (`lib/cexio.ts` →
+- The two responses are combined in a tiny server function (`lib/cexio.ts`,
   `getCoinRates`) and the product is rendered as the headline figure plus a
   reference grid.
 
@@ -115,9 +110,9 @@ public/img/                coin SVGs
 
 ## Adding a coin
 
-Edit `lib/coins.ts` — add a `{ id, name, color, logo }` entry and drop a SVG
-in `public/img/`. The dropdown and grid will pick it up automatically.
+Edit `lib/coins.ts` to add a `{ id, name, color, logo }` entry and drop a
+SVG in `public/img/`. The dropdown and grid will pick it up automatically.
 
 ## Adding a fiat
 
-Edit `lib/fiat.ts` — add `<CODE>: '<Display name>'` to the `FIAT_NAMES` map.
+Edit `lib/fiat.ts` to add `<CODE>: '<Display name>'` to the `FIAT_NAMES` map.
