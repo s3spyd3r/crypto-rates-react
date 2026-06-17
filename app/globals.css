@@ -8,21 +8,35 @@
 }
 
 :root {
-  --bg: #FAFAF9;
+  --bg: #F5F7FA;
   --surface: #FFFFFF;
-  --fg: #0A0A0A;
-  --fg-muted: #6B6B6B;
-  --border: #E7E5E4;
-  --muted: #F5F5F4;
+  --surface-2: #EFF3F8;
+  --fg: #050F19;
+  --fg-muted: #5B616E;
+  --fg-subtle: #8A919E;
+  --border: #E5E8EB;
+  --border-strong: #C9CDD3;
+  --accent: #0052FF;
+  --accent-hover: #0045D6;
+  --success: #05B169;
+  --danger: #CF202F;
+  --muted: #F7F9FC;
 }
 
 .dark {
-  --bg: #0A0A0A;
-  --surface: #141414;
-  --fg: #FAFAF9;
-  --fg-muted: #A1A1AA;
-  --border: #27272A;
-  --muted: #18181B;
+  --bg: #0A0B0D;
+  --surface: #13151A;
+  --surface-2: #1C1E25;
+  --fg: #FFFFFF;
+  --fg-muted: #8A919E;
+  --fg-subtle: #5B616E;
+  --border: #2C2F36;
+  --border-strong: #3A3D45;
+  --accent: #1652F0;
+  --accent-hover: #2974FF;
+  --success: #05B169;
+  --danger: #CF202F;
+  --muted: #13151A;
 }
 
 @layer base {
@@ -38,7 +52,7 @@
   }
 
   *:focus-visible {
-    outline: 2px solid var(--fg);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 

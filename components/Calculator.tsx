@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { COINS, COIN_BY_ID, DEFAULT_COIN, pickReadableTextColor } from '@/lib/coins';
+import { COINS, COIN_BY_ID, DEFAULT_COIN } from '@/lib/coins';
 import { FIAT_NAMES, fiatName } from '@/lib/fiat';
 import { formatAmountInput, formatFiatAmount, parseAmount } from '@/lib/format';
 import { SITE } from '@/lib/site';
@@ -145,8 +145,6 @@ export function Calculator({
   const featuredRate = rates[fiat];
   const featured = featuredRate != null ? num * featuredRate : null;
   const coinMeta = COIN_BY_ID[coin] ?? COIN_BY_ID[DEFAULT_COIN];
-  const siteColor = coinMeta.color;
-  const siteTextColor = pickReadableTextColor(siteColor);
   const fiatCurrencyCount = status.kind === 'ok' ? Object.keys(FIAT_NAMES).length : 1;
 
   const onCopy = useCallback(async () => {
@@ -163,47 +161,59 @@ export function Calculator({
 
   return (
     <>
-      <header className="border-b border-[var(--border)] bg-[var(--surface)]">
+      <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--surface)]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <a
             href="/"
-            className="font-mono text-sm uppercase tracking-[0.2em] text-[var(--fg)]"
+            className="flex items-center gap-2 text-[var(--fg)]"
           >
-            {SITE.shortTitle}
+            <span
+              aria-hidden="true"
+              className="inline-flex size-7 items-center justify-center rounded-full bg-[var(--accent)] font-sans text-sm font-bold text-white"
+            >
+              C
+            </span>
+            <span className="text-base font-semibold tracking-tight">
+              {SITE.title}
+            </span>
           </a>
           <ThemeToggle />
         </div>
       </header>
 
-      <section
-        style={{ backgroundColor: siteColor, color: siteTextColor }}
-        className="transition-colors"
-      >
-        <div className="mx-auto max-w-6xl px-6 py-14 md:py-20">
+      <section className="border-b border-[var(--border)] bg-[var(--surface)]">
+        <div
+          aria-hidden="true"
+          className="h-1 w-full"
+          style={{ backgroundColor: coinMeta.color }}
+        />
+        <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
           <p
-            className="font-mono text-xs uppercase tracking-[0.25em] opacity-80"
+            className="text-sm text-[var(--fg-muted)]"
             aria-live="polite"
           >
-            {coinMeta.name} → {fiat} {loading ? '· loading' : ''}
+            {coinMeta.name} <span className="mx-1">→</span> {fiat}{' '}
+            {loading ? '· loading' : ''}
           </p>
           <h1
-            className={`num mt-3 text-4xl font-semibold leading-none tracking-tight sm:text-5xl md:text-6xl lg:text-7xl ${
+            className={`num mt-2 text-5xl font-bold leading-none tracking-tight text-[var(--accent)] sm:text-6xl md:text-7xl ${
               loading ? 'is-loading' : ''
             }`}
           >
             {featured == null ? '—' : formatFiatAmount(featured, fiat)}
           </h1>
-          <p className="mt-4 text-base opacity-90">
-            {amount || '1'} {coinMeta.name} equals {featured != null ? formatFiatAmount(featured, fiat) : '—'} {fiatName(fiat) ?? ''}.
+          <p className="mt-3 text-base text-[var(--fg-muted)]">
+            {amount || '1'} {coinMeta.name} equals{' '}
+            {featured != null ? formatFiatAmount(featured, fiat) : '—'} {fiatName(fiat) ?? ''}
           </p>
 
           {error && (
-            <p className="mt-3 font-mono text-xs uppercase tracking-widest opacity-90">
+            <p className="mt-3 text-sm text-[var(--danger)]">
               {error}
             </p>
           )}
 
-          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label className="block">
               <span className="sr-only">Amount of {coinMeta.name}</span>
               <input
@@ -212,7 +222,7 @@ export function Calculator({
                 value={amount}
                 onChange={(e) => onAmountChange(e.target.value)}
                 placeholder="1"
-                className="w-full rounded-md border border-white/25 bg-white/10 px-3 py-3 text-base placeholder:text-white/60 focus:border-white/70"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-base text-[var(--fg)] placeholder:text-[var(--fg-subtle)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
               />
             </label>
             <label className="block">
@@ -220,10 +230,10 @@ export function Calculator({
               <select
                 value={coin}
                 onChange={(e) => onCoinChange(e.target.value)}
-                className="w-full appearance-none rounded-md border border-white/25 bg-white/10 px-3 py-3 text-base focus:border-white/70"
+                className="w-full appearance-none rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-base text-[var(--fg)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
               >
                 {COINS.map((c) => (
-                  <option key={c.id} value={c.id} className="text-black">
+                  <option key={c.id} value={c.id}>
                     {c.id} — {c.name}
                   </option>
                 ))}
@@ -234,13 +244,13 @@ export function Calculator({
               <select
                 value={fiat}
                 onChange={(e) => onFiatChange(e.target.value)}
-                className="w-full appearance-none rounded-md border border-white/25 bg-white/10 px-3 py-3 text-base focus:border-white/70"
+                className="w-full appearance-none rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-base text-[var(--fg)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
               >
                 {Object.keys(rates)
                   .filter((code) => fiatName(code) != null)
                   .sort()
                   .map((code) => (
-                    <option key={code} value={code} className="text-black">
+                    <option key={code} value={code}>
                       {code} — {fiatName(code)}
                     </option>
                   ))}
@@ -250,27 +260,29 @@ export function Calculator({
               type="button"
               onClick={onCopy}
               disabled={featured == null}
-              className="rounded-md border border-white/30 bg-white/10 px-3 py-3 text-base font-medium transition-colors hover:bg-white/20 disabled:opacity-50"
+              className="rounded-lg bg-[var(--accent)] px-4 py-3 text-base font-semibold text-white transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
             >
-              {copied ? 'Copied to clipboard' : 'Copy result'}
+              {copied ? 'Copied' : 'Copy result'}
             </button>
           </div>
         </div>
       </section>
 
       {status.kind !== 'ok' && (
-        <div className="mx-auto max-w-6xl px-6 pt-8">
+        <div className="mx-auto max-w-6xl px-6 pt-6">
           <div
             role="status"
-            className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--fg-muted)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm text-[var(--fg-muted)]"
           >
             {status.kind === 'no-key' ? (
               <p>
                 Only EUR is shown because{' '}
-                <code className="font-mono">FIXER_API_KEY</code> is not set. Add
-                it to <code className="font-mono">.env.local</code> and restart{' '}
-                <code className="font-mono">npm run dev</code> to load the
-                other {Object.keys(FIAT_NAMES).length - 1} currencies.
+                <code className="font-mono text-[var(--fg)]">FIXER_API_KEY</code> is not
+                set. Add it to{' '}
+                <code className="font-mono text-[var(--fg)]">.env.local</code> and
+                restart{' '}
+                <code className="font-mono text-[var(--fg)]">npm run dev</code> to
+                load the other {Object.keys(FIAT_NAMES).length - 1} currencies.
               </p>
             ) : (
               <p>
@@ -291,9 +303,11 @@ export function Calculator({
       />
 
       <footer className="border-t border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 font-mono text-xs uppercase tracking-widest text-[var(--fg-muted)]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 text-sm text-[var(--fg-subtle)]">
           <span>© {SITE.title}</span>
-          <span>{fiatCurrencyCount} currencies · live rates</span>
+          <span className="font-mono text-xs uppercase tracking-widest">
+            {fiatCurrencyCount} currencies · live rates
+          </span>
         </div>
       </footer>
     </>

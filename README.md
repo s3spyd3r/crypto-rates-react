@@ -1,6 +1,9 @@
 # Crypto Rates React
 
-A simple cryptocurrency calculator built with Next.js, React, and Tailwind CSS. It converts between 6 cryptocurrencies and 162 fiat currencies using live exchange rates fetched from external APIs
+A simple cryptocurrency calculator built with Next.js, React, and Tailwind CSS. 
+It converts between 6 cryptocurrencies and 162 fiat currencies using live exchange rates fetched from external APIs.
+
+![Desktop](https://raw.githubusercontent.com/s3spyd3r/crypto-rates-react/master/print.png)
 
 ## Features
 
